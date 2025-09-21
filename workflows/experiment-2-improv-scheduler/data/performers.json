@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Alex Thompson",
+    "experience_level": "advanced",
+    "preferred_games": ["Freeze Tag", "Questions Only", "Scenes from a Hat"],
+    "strengths": ["physical comedy", "quick thinking"],
+    "availability": "high"
+  },
+  {
+    "name": "Jordan Martinez",
+    "experience_level": "intermediate",
+    "preferred_games": ["Party Host", "World's Worst", "Props"],
+    "strengths": ["character work", "voice acting"],
+    "availability": "high"
+  },
+  {
+    "name": "Taylor Kim",
+    "experience_level": "beginner",
+    "preferred_games": ["Props", "New Choice", "Scenes from a Hat"],
+    "strengths": ["enthusiasm", "willingness to try anything"],
+    "availability": "medium"
+  },
+  {
+    "name": "Casey Brown",
+    "experience_level": "advanced",
+    "preferred_games": ["Gibberish Translation", "Conducted Story", "Sound Effects"],
+    "strengths": ["verbal skills", "musical ability"],
+    "availability": "high"
+  },
+  {
+    "name": "River Johnson",
+    "experience_level": "intermediate",
+    "preferred_games": ["Living Props", "Freeze Tag", "Alphabet"],
+    "strengths": ["physical comedy", "collaboration"],
+    "availability": "medium"
+  },
+  {
+    "name": "Morgan Davis",
+    "experience_level": "advanced",
+    "preferred_games": ["Party Host", "Conducted Story", "Questions Only"],
+    "strengths": ["storytelling", "scene building"],
+    "availability": "high"
+  },
+  {
+    "name": "Sam Wilson",
+    "experience_level": "beginner",
+    "preferred_games": ["Props", "World's Worst", "New Choice"],
+    "strengths": ["energy", "comedic timing"],
+    "availability": "high"
+  },
+  {
+    "name": "Avery Lee",
+    "experience_level": "intermediate",
+    "preferred_games": ["Sound Effects", "Living Props", "Scenes from a Hat"],
+    "strengths": ["creativity", "support work"],
+    "availability": "medium"
+  }
+]

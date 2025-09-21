@@ -1,0 +1,8 @@
+# Python dependencies for the improv scheduler
+# No external dependencies required - uses only Python standard library
+# This file is included for completeness and future extensions
+
+# Optional dependencies for enhanced functionality:
+# tabulate>=0.9.0  # For better table formatting
+# jinja2>=3.0.0    # For advanced template formatting
+# click>=8.0.0     # For enhanced CLI interface
