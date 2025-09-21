@@ -1,0 +1,110 @@
+[
+  {
+    "name": "Alphabet",
+    "description": "Players must speak in alphabetical order, with each line starting with the next letter of the alphabet",
+    "min_players": 2,
+    "max_players": 4,
+    "category": "verbal",
+    "difficulty": "medium",
+    "duration_minutes": 3
+  },
+  {
+    "name": "Party Host",
+    "description": "One player hosts a party while others arrive with specific quirks or characteristics",
+    "min_players": 3,
+    "max_players": 6,
+    "category": "character",
+    "difficulty": "easy",
+    "duration_minutes": 4
+  },
+  {
+    "name": "Props",
+    "description": "Players use random objects as something other than what they actually are",
+    "min_players": 2,
+    "max_players": 8,
+    "category": "physical",
+    "difficulty": "easy",
+    "duration_minutes": 3
+  },
+  {
+    "name": "Freeze Tag",
+    "description": "Two players start a scene, others tap in and create new scenes based on the frozen positions",
+    "min_players": 4,
+    "max_players": 8,
+    "category": "physical",
+    "difficulty": "medium",
+    "duration_minutes": 5
+  },
+  {
+    "name": "Questions Only",
+    "description": "Players can only communicate through questions",
+    "min_players": 2,
+    "max_players": 4,
+    "category": "verbal",
+    "difficulty": "medium",
+    "duration_minutes": 3
+  },
+  {
+    "name": "Scenes from a Hat",
+    "description": "Players act out scenes based on audience suggestions written on paper",
+    "min_players": 2,
+    "max_players": 6,
+    "category": "situational",
+    "difficulty": "easy",
+    "duration_minutes": 4
+  },
+  {
+    "name": "World's Worst",
+    "description": "Players demonstrate the worst possible way to do various activities",
+    "min_players": 3,
+    "max_players": 8,
+    "category": "comedic",
+    "difficulty": "easy",
+    "duration_minutes": 3
+  },
+  {
+    "name": "Gibberish Translation",
+    "description": "One player speaks gibberish while another translates the meaning",
+    "min_players": 2,
+    "max_players": 2,
+    "category": "verbal",
+    "difficulty": "hard",
+    "duration_minutes": 4
+  },
+  {
+    "name": "Conducted Story",
+    "description": "A conductor controls the pace and emotion of storytellers",
+    "min_players": 3,
+    "max_players": 6,
+    "category": "storytelling",
+    "difficulty": "medium",
+    "duration_minutes": 5
+  },
+  {
+    "name": "Living Props",
+    "description": "Some players become inanimate objects while others use them in scenes",
+    "min_players": 4,
+    "max_players": 8,
+    "category": "physical",
+    "difficulty": "medium",
+    "duration_minutes": 4
+  },
+  {
+    "name": "Sound Effects",
+    "description": "Actors perform a scene while others provide live sound effects",
+    "min_players": 3,
+    "max_players": 6,
+    "category": "audio",
+    "difficulty": "medium",
+    "duration_minutes": 4
+  },
+  {
+    "name": "New Choice",
+    "description": "Host can call 'new choice' to make players change their last line or action",
+    "min_players": 2,
+    "max_players": 4,
+    "category": "interactive",
+    "difficulty": "easy",
+    "duration_minutes": 4
+  }
+]

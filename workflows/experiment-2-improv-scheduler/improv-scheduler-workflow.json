@@ -1,0 +1,177 @@
+{
+  "name": "Improv Comedy Show Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "schedule-show",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Schedule Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "schedule-show-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse and validate the incoming request\nconst body = $input.item(0).json.body || {};\n\n// Default values\nconst showDuration = parseInt(body.duration) || 60;\nconst minAvailability = body.availability || 'medium';\nconst outputFormat = body.format || 'json';\nconst gameCount = parseInt(body.gameCount) || null;\n\n// Validate inputs\nif (showDuration < 15 || showDuration > 180) {\n  throw new Error('Show duration must be between 15 and 180 minutes');\n}\n\nif (!['high', 'medium', 'low'].includes(minAvailability)) {\n  throw new Error('Availability must be high, medium, or low');\n}\n\nif (!['text', 'json', 'markdown'].includes(outputFormat)) {\n  throw new Error('Format must be text, json, or markdown');\n}\n\nreturn {\n  showDuration,\n  minAvailability,\n  outputFormat,\n  gameCount,\n  requestId: Date.now().toString(),\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "request-validator",
+      "name": "Validate Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /tmp/n8n-improv-scheduler && python3 scripts/scheduler.py --duration {{$json.showDuration}} --availability {{$json.minAvailability}} --format {{$json.outputFormat}}",
+        "options": {}
+      },
+      "id": "python-scheduler",
+      "name": "Run Python Scheduler",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process the Python script output\nconst commandResult = $input.item(0).json;\nconst requestData = $node['Validate Request'].json;\n\n// Check if command was successful\nif (commandResult.exitCode !== 0) {\n  throw new Error(`Scheduler failed: ${commandResult.stderr || 'Unknown error'}`);\n}\n\nconst scheduleOutput = commandResult.stdout;\nlet parsedSchedule;\n\nif (requestData.outputFormat === 'json') {\n  try {\n    parsedSchedule = JSON.parse(scheduleOutput);\n  } catch (e) {\n    throw new Error('Failed to parse JSON output from scheduler');\n  }\n} else {\n  parsedSchedule = {\n    format: requestData.outputFormat,\n    content: scheduleOutput\n  };\n}\n\nreturn {\n  requestId: requestData.requestId,\n  schedule: parsedSchedule,\n  parameters: {\n    duration: requestData.showDuration,\n    availability: requestData.minAvailability,\n    format: requestData.outputFormat,\n    gameCount: requestData.gameCount\n  },\n  generatedAt: requestData.timestamp,\n  success: true\n};"
+      },
+      "id": "process-output",
+      "name": "Process Schedule Output",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json, null, 2)}}",
+        "options": {
+          "responseHeaders": {
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "webhook-response",
+      "name": "Return Schedule",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "write",
+        "fileName": "=/tmp/schedule-{{$json.requestId}}.json",
+        "data": "={{JSON.stringify($json, null, 2)}}"
+      },
+      "id": "save-schedule",
+      "name": "Save Schedule Log",
+      "type": "n8n-nodes-base.fileSystem",
+      "typeVersion": 1,
+      "position": [
+        900,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Setup Python environment and copy files\nconst fs = require('fs');\nconst path = require('path');\n\n// This would be run once during setup\n// Copy the scheduler files to the working directory\n// In practice, this would be handled by the deployment process\n\nreturn {\n  message: 'Environment setup initiated',\n  workingDir: '/tmp/n8n-improv-scheduler',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "setup-environment",
+      "name": "Setup Environment",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        480
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Request": {
+      "main": [
+        [
+          {
+            "node": "Run Python Scheduler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Python Scheduler": {
+      "main": [
+        [
+          {
+            "node": "Process Schedule Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Schedule Output": {
+      "main": [
+        [
+          {
+            "node": "Return Schedule",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Schedule Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "improv-scheduler-workflow",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}

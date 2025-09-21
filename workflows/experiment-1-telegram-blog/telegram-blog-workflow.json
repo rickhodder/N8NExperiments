@@ -1,0 +1,140 @@
+{
+  "name": "Telegram to Blog Entry",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Bot",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "telegram-blog-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credentials",
+          "name": "Telegram Bot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Clean and validate the incoming text\nconst message = $input.item(0).json;\nconst text = message.message?.text || '';\n\n// Basic text cleaning\nlet cleanedText = text\n  .trim()\n  .replace(/\\s+/g, ' ')  // Replace multiple spaces with single space\n  .replace(/[^\\w\\s.,!?;:-]/g, '')  // Remove special characters except basic punctuation\n  .replace(/\\b(um|uh|like|you know)\\b/gi, '')  // Remove filler words\n  .trim();\n\n// Capitalize first letter\nif (cleanedText) {\n  cleanedText = cleanedText.charAt(0).toUpperCase() + cleanedText.slice(1);\n}\n\n// Ensure it ends with punctuation\nif (cleanedText && !/[.!?]$/.test(cleanedText)) {\n  cleanedText += '.';\n}\n\nreturn {\n  originalText: text,\n  cleanedText: cleanedText,\n  wordCount: cleanedText.split(' ').length,\n  timestamp: new Date().toISOString(),\n  messageId: message.message?.message_id,\n  fromUser: message.message?.from?.username || 'unknown'\n};"
+      },
+      "id": "text-cleaner",
+      "name": "Text Cleaner",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Format the cleaned text into a blog entry beginning\nconst data = $input.item(0).json;\nconst cleanedText = data.cleanedText;\n\nif (!cleanedText || cleanedText.length < 10) {\n  throw new Error('Text too short or empty to create a blog entry');\n}\n\n// Generate blog entry structure\nconst blogTitle = generateTitle(cleanedText);\nconst blogIntro = generateIntroduction(cleanedText);\nconst blogOutline = generateOutline(cleanedText);\n\nfunction generateTitle(text) {\n  // Extract key concepts for title generation\n  const words = text.toLowerCase().split(' ');\n  const keyWords = words.filter(word => \n    word.length > 4 && \n    !['about', 'through', 'would', 'could', 'should', 'their', 'there', 'where'].includes(word)\n  );\n  \n  // Create a title based on the first few key concepts\n  const titleWords = keyWords.slice(0, 4).map(word => \n    word.charAt(0).toUpperCase() + word.slice(1)\n  );\n  \n  return `Exploring ${titleWords.join(' ')}: A Deep Dive into Modern Innovation`;\n}\n\nfunction generateIntroduction(text) {\n  return `# Introduction\n\nIn today's rapidly evolving technological landscape, new ideas and concepts emerge daily that have the potential to reshape our understanding and approach to complex challenges. ${text}\n\nThis blog post will explore this fascinating topic in detail, examining its implications, potential applications, and the broader context within which it operates.`;\n}\n\nfunction generateOutline(text) {\n  return `\n## Article Outline\n\n1. **Background and Context**\n   - Current state of the field\n   - Key challenges and opportunities\n\n2. **Core Concepts**\n   - Detailed exploration of the main idea\n   - Technical considerations\n\n3. **Real-World Applications**\n   - Practical implementations\n   - Case studies and examples\n\n4. **Future Implications**\n   - Potential developments\n   - Long-term impact\n\n5. **Conclusion**\n   - Key takeaways\n   - Next steps for exploration\n\n---\n\n*This blog entry was generated from a Telegram message on ${new Date().toLocaleDateString()}*`;\n}\n\nconst fullBlogEntry = `# ${blogTitle}\n\n${blogIntro}\n\n${blogOutline}`;\n\nreturn {\n  title: blogTitle,\n  fullContent: fullBlogEntry,\n  wordCount: fullBlogEntry.split(' ').length,\n  originalIdea: cleanedText,\n  generatedAt: data.timestamp,\n  sourceUser: data.fromUser,\n  messageId: data.messageId\n};"
+      },
+      "id": "blog-formatter",
+      "name": "Blog Formatter",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "write",
+        "fileName": "=/tmp/blog-{{$json.messageId}}-{{$now.format('YYYY-MM-DD-HH-mm')}}.md",
+        "data": "={{$json.fullContent}}"
+      },
+      "id": "save-blog",
+      "name": "Save Blog Entry",
+      "type": "n8n-nodes-base.fileSystem",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node['Telegram Bot'].json.message.chat.id}}",
+        "text": "=✅ Blog entry created successfully!\n\n**Title:** {{$json.title}}\n\n**Word Count:** {{$json.wordCount}} words\n\n**Preview:**\n{{$json.fullContent.substring(0, 200)}}...\n\nFull blog entry has been saved and is ready for review!"
+      },
+      "id": "telegram-response",
+      "name": "Send Confirmation",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        900,
+        480
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credentials",
+          "name": "Telegram Bot API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Bot": {
+      "main": [
+        [
+          {
+            "node": "Text Cleaner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Cleaner": {
+      "main": [
+        [
+          {
+            "node": "Blog Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blog Formatter": {
+      "main": [
+        [
+          {
+            "node": "Save Blog Entry",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "telegram-blog-workflow",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
